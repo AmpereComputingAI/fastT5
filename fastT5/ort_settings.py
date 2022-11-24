@@ -1,9 +1,9 @@
 import os, psutil
 
-os.environ["OMP_NUM_THREADS"] = str(psutil.cpu_count(logical=True))
+os.environ["OMP_NUM_THREADS"] = os.environ["AIO_NUM_THREADS"]
 os.environ["OMP_WAIT_POLICY"] = "ACTIVE"
 
-
+import onnxruntime as ort
 from onnxruntime import (
     GraphOptimizationLevel,
     InferenceSession,
@@ -14,9 +14,9 @@ from onnxruntime import (
 
 def get_onnx_runtime_sessions(
     model_paths,
-    default: bool = True,
+    default: bool = False,
     opt_level: int = 99,
-    parallel_exe_mode: bool = True,
+    parallel_exe_mode: bool = False,
     n_threads: int = 0,
     provider=[
         "CPUExecutionProvider",
@@ -79,7 +79,8 @@ def get_onnx_runtime_sessions(
         options.intra_op_num_threads = n_threads
         # options.inter_op_num_threads = 10
 
-        # options.enable_profiling = True
+        if os.getenv("ORT_PROFILER", "0") == "1":
+            options.enable_profiling = True
 
         encoder_sess = InferenceSession(
             str(path_to_encoder), options, providers=provider

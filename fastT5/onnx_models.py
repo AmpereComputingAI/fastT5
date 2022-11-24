@@ -20,6 +20,8 @@ from transformers.modeling_outputs import (
 import torch
 import functools
 import operator
+import os
+import onnxruntime
 
 
 class T5Encoder(torch.nn.Module):
@@ -259,7 +261,8 @@ def get_onnx_model(model_name, onnx_models_path=saved_models_path, quantized=Tru
 
     model_paths = encoder_path, decoder_path, init_decoder_path
 
-    model_sessions = get_onnx_runtime_sessions(model_paths)
+    model_sessions = get_onnx_runtime_sessions(
+        model_paths, n_threads=int(os.environ["AIO_NUM_THREADS"]), provider=ort.get_available_providers())
 
     model = OnnxT5(model_name, model_sessions)
 
