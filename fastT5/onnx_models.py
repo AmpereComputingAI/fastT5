@@ -21,7 +21,7 @@ import torch
 import functools
 import operator
 import os
-import onnxruntime
+import onnxruntime as ort
 
 
 class T5Encoder(torch.nn.Module):
